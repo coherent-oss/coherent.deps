@@ -63,6 +63,10 @@ class Import(str):
         """
         return self._check_standard(self.split('.')[0])
 
+    def builtin(self):
+        # for compatibility
+        return self.standard()
+
     CPE = jaraco.context.ExceptionTrap(subprocess.CalledProcessError)
 
     @staticmethod
