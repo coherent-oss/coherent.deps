@@ -45,30 +45,30 @@ class Import(str):
         parents = p_names[:-blanks] if blanks else p_names
         return '.'.join(parents + l_names[blanks:])
 
-    def builtin(self):
+    def standard(self):
         """
-        Is this import built-in (part of the stdandard library)?
+        Is this import part of the stdandard library?
 
-        An import is built-in if it's top-level name is importable
+        An import is standard if it's top-level name is importable
         without any third-party packages.
 
-        >>> Import('requests').builtin()
+        >>> Import('requests').standard()
         False
-        >>> Import('urllib.parse').builtin()
+        >>> Import('urllib.parse').standard()
         True
-        >>> Import('os').builtin()
+        >>> Import('os').standard()
         True
-        >>> Import('pip').builtin()
+        >>> Import('pip').standard()
         False
         """
-        return self._check_builtin(self.split('.')[0])
+        return self._check_standard(self.split('.')[0])
 
     CPE = jaraco.context.ExceptionTrap(subprocess.CalledProcessError)
 
     @staticmethod
     @functools.lru_cache
     @CPE.passes
-    def _check_builtin(top_level_name):
+    def _check_standard(top_level_name):
         # Windows can choke without these vars (python/cpython#120836)
         safe_isolation = Projection(['SYSTEMDRIVE', 'SYSTEMROOT'], os.environ)
         cmd = [sys.executable, '-S', '-c', f'import {top_level_name}']
@@ -109,7 +109,7 @@ def _(module: pathlib.Path):
 
 
 def print_module_imports(path: pathlib.Path):
-    print(list(name for name in get_module_imports(path) if not name.builtin()))
+    print(list(name for name in get_module_imports(path) if not name.standard()))
 
 
 __name__ == '__main__' and print_module_imports(pathlib.Path(sys.argv[1]))
