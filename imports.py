@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import functools
+import os
 import pathlib
 import subprocess
 import sys
@@ -9,6 +10,7 @@ import sys
 from typing import Generator
 
 import jaraco.context
+from jaraco.collections import Projection
 
 
 def rel_prefix(node):
@@ -68,8 +70,10 @@ class Import(str):
     @functools.lru_cache
     @CPE.passes
     def _check_builtin(top_level_name):
+        # Windows can choke without these vars (python/cpython#120836)
+        safe_isolation = Projection(['SYSTEMDRIVE', 'SYSTEMROOT'], os.environ)
         cmd = [sys.executable, '-S', '-c', f'import {top_level_name}']
-        subprocess.check_call(cmd, env={}, stderr=subprocess.DEVNULL)
+        subprocess.check_call(cmd, env=safe_isolation, stderr=subprocess.DEVNULL)
 
 
 @functools.singledispatch
