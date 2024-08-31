@@ -4,8 +4,8 @@ Resolve the top-level packages supplied by the most popular distributions.
 
 import functools
 import getpass
-import io
 import importlib.metadata
+import io
 import itertools
 import json
 import logging
@@ -14,8 +14,6 @@ import os
 import pathlib
 import re
 import tokenize
-from zipp.compat.overlay import zipfile
-
 from typing import Iterator
 
 import jaraco.collections
@@ -26,10 +24,10 @@ from jaraco.context import suppress
 from jaraco.functools import apply
 from more_itertools import first, one
 from requests.exceptions import HTTPError
-from requests_toolbelt import sessions
 from requests_file import FileAdapter
+from requests_toolbelt import sessions
 from retry_requests import retry
-
+from zipp.compat.overlay import zipfile
 
 session = retry(sessions.BaseUrlSession('https://pypi.python.org/pypi/'))
 session.mount('file://', FileAdapter())
