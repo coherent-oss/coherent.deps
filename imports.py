@@ -76,7 +76,7 @@ class Import(str):
 
 
 @functools.singledispatch
-def get_module_imports(module: pathlib.Path | str) -> Generator[str]:
+def get_module_imports(module: pathlib.Path | str | bytes) -> Generator[str]:
     r"""
     Parse a Python module to extract imported names.
 
@@ -105,7 +105,7 @@ def get_module_imports(module: pathlib.Path | str) -> Generator[str]:
 
 @get_module_imports.register
 def _(module: pathlib.Path):
-    return get_module_imports(module.read_text())
+    return get_module_imports(module.read_bytes())
 
 
 def print_module_imports(path: pathlib.Path):
