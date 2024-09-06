@@ -57,7 +57,11 @@ def client(username=None):
     """
     username = username or os.environ.get('DB_USER') or 'anonymous'
     cluster = os.environ.get('DB_CLUSTER') or 'cluster0.acvlhai.mongodb.net'
-    password = keyring.get_password(cluster, username) or 'coherent.build'
+    password = (
+        'coherent.build'
+        if username == 'anonymous'
+        else keyring.get_password(cluster, username)
+    )
     uri = f'mongodb+srv://{username}:{password}@{cluster}/pypi'
     return jaraco.mongodb.helper.connect_db(uri)
 
