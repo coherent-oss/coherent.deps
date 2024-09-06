@@ -20,6 +20,7 @@ import jaraco.collections
 import jaraco.mongodb.helper
 import keyring
 import tempora.utc
+from jaraco.compat.py38 import cache
 from jaraco.context import suppress
 from jaraco.functools import apply
 from more_itertools import first, one
@@ -36,7 +37,7 @@ log = logging.getLogger(__name__)
 top_8k = 'https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json'
 
 
-@functools.cache
+@cache
 def store():
     """
     An authenticated, read-write connection to the collection.
@@ -47,7 +48,7 @@ def store():
     return db.distributions
 
 
-@functools.cache
+@cache
 def client(username=None):
     """
     A client to the database.
