@@ -1,5 +1,46 @@
 """
 Resolve the top-level packages supplied by the most popular distributions.
+
+This functionality is backed by a database hosted in MongoDB Atlas. In
+addition to the programmatic APIs provided herein, a MongoDB HTTP
+Endpoint is also provided to query the database using a REST API.
+
+Simply issue a GET request to the endpoint URL with a ``root`` parameter
+indicating the root import to resolve, and the API will return the
+full JSON of the matching database record. For example using
+`httpie <https://httpie.io/cli>`_:
+
+    http https://us-east-1.aws.data.mongodb-api.com/app/application-0-ponwfin/endpoint/distributions_for root==importlib_metadata
+    HTTP/1.1 200 OK
+    content-encoding: gzip
+    content-length: 155
+    content-type: application/json
+    date: Sat, 31 Aug 2024 17:48:55 GMT
+    server: mdbws
+    strict-transport-security: max-age=31536000; includeSubdomains;
+    vary: Origin
+    x-appservices-request-id: 66d357870823bff37156f0b0
+    x-frame-options: DENY
+    x-xgen-up-proto: HTTP/2
+
+    {
+        "_id": "66ba6a7cc4bc876f5a786913",
+        "downloads": 228476712,
+        "id": "importlib-metadata",
+        "name": "importlib_metadata",
+        "roots": [
+            "importlib_metadata"
+        ],
+        "updated": "2024-08-12T20:03:08.919Z"
+    }
+
+Note the ``id`` member is the
+`PEP 503 normalized name <https://peps.python.org/pep-0503/#normalized-names>`_
+and the ``name`` is the project's formal name as defined in package metadata.
+
+This API is hosted in a free-tier MongoDB app, which allows for a modest number
+of requests, so if using this API, please use it gently or reach out to this project
+if the application is likely to generate more than casual use.
 """
 
 import functools
@@ -90,9 +131,24 @@ def is_root(module):
     return client().distributions.find_one({'roots': module})
 
 
-def distribution_for(import_name):
+def distribution_for(import_name: str) -> str:
     """
-    Resolve a distribution name from an import name.
+    Resolve a PyPI distribution name from an import name.
+
+    >>> distribution_for('pkg_resources')
+    'setuptools'
+    >>> distribution_for('cherrypy.lib')
+    'CherryPy'
+    >>> distribution_for('backports.configparser')
+    'configparser'
+
+    Raises an exception (StopIteration currently) when no known
+    distribution presents the name.
+
+    >>> distribution_for('import_who_shall_not_be_named.foo.bar')
+    Traceback (most recent call last):
+    ...
+    StopIteration...
     """
     return next(filter(bool, map(is_root, all_names(import_name))))['name']
 

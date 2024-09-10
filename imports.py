@@ -1,3 +1,17 @@
+"""
+Parse source files and extract the imports in those source files.
+
+Uses static analysis to find all imports (relative and absolute).
+
+Categorizes imports as standard (from the standard library) or
+not (third party).
+
+Run this module against a specific file to emit the third-party
+imports for that module:
+
+    python -m coherent.deps.imports imports.py
+"""
+
 from __future__ import annotations
 
 import ast
@@ -72,7 +86,12 @@ class Import(str):
     @staticmethod
     @functools.lru_cache
     @CPE.passes
-    def _check_standard(top_level_name):
+    def _check_standard(top_level_name: str) -> bool:
+        """
+        Attempt to import the name in a clean Python interpreter.
+
+        Return True if it's found in the standard library, and False otherwise.
+        """
         # Windows can choke without these vars (python/cpython#120836)
         safe_isolation = Projection(['SYSTEMDRIVE', 'SYSTEMROOT'], os.environ)
         cmd = [sys.executable, '-S', '-c', f'import {top_level_name}']

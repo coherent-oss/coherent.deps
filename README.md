@@ -1,0 +1,3 @@
+Coherent deps (dependencies) is a library of tools used by the [Coherent System](https://bit.ly/coherent-system) for providing insights into the dependencies used by a code base, in particular resolving imports to the dependencies that supply those imports. This sophisticated behavior enables Python projects to avoid the need to declare dependencies and to instead focus on the implementation. The Coherent OSS community provides this library separately to make the functionality available for alternative uses.
+
+See the code documentation for details. See also the [usage in `coherent.build`](https://github.com/coherent-oss/coherent.build/blob/a95e65df11c86658a689a7b7f5f6626321802f7e/discovery.py#L162-L175) for the usage by the build backend.
