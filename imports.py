@@ -61,7 +61,7 @@ class Import(str):
 
     def standard(self):
         """
-        Is this import part of the stdandard library?
+        Is this import part of the standard library?
 
         An import is standard if it's top-level name is importable
         without any third-party packages.
