@@ -131,6 +131,9 @@ def is_root(module):
     return client().distributions.find_one({'roots': module})
 
 
+class NoDistributionForImport(LookupError): ...
+
+
 def distribution_for(import_name: str) -> str:
     """
     Resolve a PyPI distribution name from an import name.
@@ -148,9 +151,12 @@ def distribution_for(import_name: str) -> str:
     >>> distribution_for('import_who_shall_not_be_named.foo.bar')
     Traceback (most recent call last):
     ...
-    StopIteration...
+    coherent.deps...NoDistributionForImport: import_who_shall_not_be_named.foo.bar
     """
-    return next(filter(bool, map(is_root, all_names(import_name))))['name']
+    try:
+        return next(filter(bool, map(is_root, all_names(import_name))))['name']
+    except StopIteration:
+        raise NoDistributionForImport(import_name) from None
 
 
 class Distribution(str):
