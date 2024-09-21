@@ -96,6 +96,27 @@ class Import(str):
         # for compatibility
         return self.standard()
 
+    def implicit(self):
+        """
+        Is this module implicitly available (based on other conditions)?
+
+        For example, ``_typeshed`` is made available at runtime by mypy
+        and other type checkers and will not have a distribution that
+        supplies it.
+
+        >>> Import('_typeshed.StrPath').implicit()
+        True
+        >>> Import('._typeshed').implicit()
+        False
+        >>> Import('os').implicit()
+        False
+        """
+        implicit = {'_typeshed'}
+        return self.top in implicit
+
+    def excluded(self):
+        return self.implicit() or self.standard()
+
     CPE = jaraco.context.ExceptionTrap(subprocess.CalledProcessError)
 
     @staticmethod
