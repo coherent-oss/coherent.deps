@@ -74,8 +74,23 @@ class Import(str):
         True
         >>> Import('pip').standard()
         False
+        >>> Import('.os').standard()
+        False
         """
-        return self._check_standard(self.split('.')[0])
+        return bool(self.top) and self._check_standard(self.top)
+
+    @property
+    def top(self) -> str | None:
+        """
+        Return the top-level name for this import.
+
+        >>> Import('foo.bar').top
+        'foo'
+        >>> Import('foo').top
+        'foo'
+        >>> Import('.foo.bar').top
+        """
+        return self.split('.')[0] or None
 
     def builtin(self):
         # for compatibility
