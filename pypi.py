@@ -193,8 +193,9 @@ class Distribution(str):
 
     @classmethod
     def unprocessed(cls):
-        query = {"updated": {"$exists": False}}
-        return map(cls, map(operator.itemgetter('id'), store().find(query)))
+        query = dict(updated={"$exists": False})
+        sort = dict(downloads=-1)
+        return map(cls, map(operator.itemgetter('id'), store().find(query, sort=sort)))
 
     def refresh(self):
         vars(self).update(self.from_wheel())
