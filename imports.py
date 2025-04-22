@@ -20,7 +20,7 @@ import os
 import pathlib
 import subprocess
 import sys
-from typing import Generator
+from collections.abc import Generator
 
 import jaraco.context
 from jaraco.collections import Projection

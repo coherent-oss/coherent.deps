@@ -55,7 +55,7 @@ import os
 import pathlib
 import re
 import tokenize
-from typing import Iterator
+from collections.abc import Iterator
 
 import jaraco.collections
 import jaraco.mongodb.helper
