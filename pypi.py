@@ -71,6 +71,8 @@ from requests_toolbelt import sessions
 from retry_requests import retry
 from zipp.compat.overlay import zipfile
 
+from . import monkey
+
 session = retry(sessions.BaseUrlSession('https://pypi.python.org/pypi/'))
 session.mount('file://', FileAdapter())
 log = logging.getLogger(__name__)
@@ -96,6 +98,7 @@ def client(username=None):
 
     Defaults to an anonymous, read-only connection if no username is supplied.
     """
+    monkey.patch_dnspython_resolver_config()
     username = username or os.environ.get('DB_USER') or 'anonymous'
     cluster = os.environ.get('DB_CLUSTER') or 'cluster0.acvlhai.mongodb.net'
     password = (
