@@ -12,5 +12,4 @@ from .. import pypi
 def run():
     res = pypi.Distribution.unprocessed()
     for dist in tqdm.tqdm(res.dists, total=res.count):
-        dist.refresh()
-        dist.save()
+        dist.process()

@@ -204,6 +204,10 @@ class Distribution(str):
             dists=map(cls, ids),
         )
 
+    def process(self):
+        self.refresh()
+        self.save()
+
     def refresh(self):
         vars(self).update(self.from_wheel())
 
