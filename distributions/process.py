@@ -10,6 +10,7 @@ from .. import pypi
 
 @main
 def run():
-    for dist in tqdm.tqdm(pypi.Distribution.unprocessed()):
+    res = pypi.Distribution.unprocessed()
+    for dist in tqdm.tqdm(res.dists, total=res.count):
         dist.refresh()
         dist.save()

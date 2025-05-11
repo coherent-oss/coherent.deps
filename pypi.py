@@ -55,6 +55,7 @@ import os
 import pathlib
 import re
 import tokenize
+import types
 from collections.abc import Iterator
 
 import jaraco.collections
@@ -195,7 +196,13 @@ class Distribution(str):
     def unprocessed(cls):
         query = dict(updated={"$exists": False})
         sort = dict(downloads=-1)
-        return map(cls, map(operator.itemgetter('id'), store().find(query, sort=sort)))
+        count = store().count_documents(query)
+        cursor = store().find(query, sort=sort)
+        ids = map(operator.itemgetter('id'), cursor)
+        return types.SimpleNamespace(
+            count=count,
+            dists=map(cls, ids),
+        )
 
     def refresh(self):
         vars(self).update(self.from_wheel())
