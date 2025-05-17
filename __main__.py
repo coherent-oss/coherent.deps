@@ -71,5 +71,5 @@ def main(
             return []
 
     deps = set(filter(None, (dep for file in files for dep in file_deps(file))))
-    emit = dict(plain=emit_plain, toml=emit_toml, pep723=emit_pep723)[format]
+    emit = globals()[f'emit_{format}']
     emit(deps)
