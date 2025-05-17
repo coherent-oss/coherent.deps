@@ -11,6 +11,7 @@ Options:
 For each file matching the globs, parses dependencies and emits them in the requested format.
 """
 
+import glob
 import pathlib
 
 from jaraco.ui.main import main
@@ -35,9 +36,8 @@ def emit_pep723(deps):
     print("# ]\n# ///")
 
 
-def parse_glob(glob):
-    print(glob)
-    return glob
+def parse_glob(spec: str):
+    return map(pathlib.Path, glob.glob(spec))
 
 
 @main
@@ -45,7 +45,7 @@ def main(
     globs: list[str],
     format: str = 'plain',
 ):
-    files = flatten(map(pathlib.Path().glob, globs))
+    files = flatten(map(parse_glob, globs))
     imps = flatten(map(imports.get_module_imports, files))
     deps = (pypi.distribution_for(imp) for imp in imps if not imp.excluded())
     globals()[f'emit_{format}'](deps)
