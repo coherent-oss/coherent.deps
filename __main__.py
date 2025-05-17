@@ -11,25 +11,14 @@ Options:
 For each file matching the globs, parses dependencies and emits them in the requested format.
 """
 
-import argparse
-import glob
+import itertools
 import pathlib
 import sys
 
+from jaraco.ui.main import main
+
 from .imports import Import, get_module_imports
 from .pypi import NoDistributionForImport, distribution_for
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Emit dependencies for Python files.")
-    parser.add_argument("globs", nargs="+", help="File globs to process")
-    parser.add_argument(
-        "--format",
-        choices=["plain", "toml", "pep723"],
-        default="plain",
-        help="Output format",
-    )
-    return parser.parse_args()
 
 
 def emit_plain(deps):
@@ -48,9 +37,20 @@ def emit_pep723(deps):
     print("# ]\n# ///")
 
 
-def main():
-    args = parse_args()
-    files = set().union(*map(lambda pat: glob.glob(pat, recursive=True), args.globs))
+def parse_glob(glob):
+    print(glob)
+    return glob
+
+
+flatten = itertools.chain.from_iterable
+
+
+@main
+def main(
+    globs: list[str],
+    format: str = 'plain',
+):
+    files = list(flatten(map(pathlib.Path().glob, globs)))
 
     def import_to_dep(name):
         imp = Import(name)
@@ -71,9 +71,5 @@ def main():
             return []
 
     deps = set(filter(None, (dep for file in files for dep in file_deps(file))))
-    emit = dict(plain=emit_plain, toml=emit_toml, pep723=emit_pep723)[args.format]
+    emit = dict(plain=emit_plain, toml=emit_toml, pep723=emit_pep723)[format]
     emit(deps)
-
-
-if __name__ == "__main__":
-    main()
