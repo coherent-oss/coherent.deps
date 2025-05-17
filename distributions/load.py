@@ -22,5 +22,14 @@ def _make_url(url_or_path: str) -> str:
 def run(
     url: str = typer.Argument(pypi.top_8k, callback=_make_url),
 ):
-    for dist in tqdm.tqdm(list(pypi.Distribution.query(url=url))):
-        dist.save()
+    try:
+        skip = int(pathlib.Path('skip').read_text())
+    except FileNotFoundError:
+        skip = 0
+    dists = tqdm.tqdm(list(pypi.Distribution.query(url=url))[skip:], initial=skip)
+    try:
+        for dist in dists:
+            dist.save()
+    except BaseException:
+        pathlib.Path('skip').write_text(str(dists.n))
+        raise
