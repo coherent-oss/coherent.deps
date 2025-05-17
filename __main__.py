@@ -12,13 +12,11 @@ For each file matching the globs, parses dependencies and emits them in the requ
 """
 
 import pathlib
-import sys
 
 from jaraco.ui.main import main
 from more_itertools import flatten
 
-from .imports import Import, get_module_imports
-from .pypi import NoDistributionForImport, distribution_for
+from . import imports, pypi
 
 
 def emit_plain(deps):
@@ -47,26 +45,7 @@ def main(
     globs: list[str],
     format: str = 'plain',
 ):
-    files = list(flatten(map(pathlib.Path().glob, globs)))
-
-    def import_to_dep(name):
-        imp = Import(name)
-        if imp.excluded():
-            return None
-        try:
-            return distribution_for(imp.top)
-        except NoDistributionForImport:
-            return None
-
-    def file_deps(file):
-        try:
-            return filter(
-                None, map(import_to_dep, get_module_imports(pathlib.Path(file)))
-            )
-        except Exception as e:
-            print(f"Error processing {file}: {e}", file=sys.stderr)
-            return []
-
-    deps = set(filter(None, (dep for file in files for dep in file_deps(file))))
-    emit = globals()[f'emit_{format}']
-    emit(deps)
+    files = flatten(map(pathlib.Path().glob, globs))
+    imps = flatten(map(imports.get_module_imports, files))
+    deps = (pypi.distribution_for(imp) for imp in imps if not imp.excluded())
+    globals()[f'emit_{format}'](deps)
