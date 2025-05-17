@@ -30,10 +30,16 @@ def emit_toml(deps):
     print("]")
 
 
-def emit_pep723(deps):
+def emit_inline(deps):
     print("""# ///\n# requires-python = ">=3.8"\n# dependencies = [""")
     print(*map(lambda d: f'#     "{d}",', sorted(deps)), sep="\n")
     print("# ]\n# ///")
+
+
+def emit_python(deps):
+    print("""__requires__ = [""")
+    print(*map(lambda d: f'    "{d}",', sorted(deps)), sep="\n")
+    print("]")
 
 
 def parse_glob(spec: str):
