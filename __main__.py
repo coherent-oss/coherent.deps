@@ -5,9 +5,6 @@ Usage:
     pipx run coherent.deps [options] <glob> [<glob> ...]
     py -m coherent.deps [options] <glob> [<glob> ...]
 
-Options:
-    --format=plain|toml|pep723   Output format (default: plain)
-
 For each file matching the globs, parses dependencies and emits them in the requested format.
 """
 
