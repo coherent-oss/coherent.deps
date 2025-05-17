@@ -11,11 +11,11 @@ Options:
 For each file matching the globs, parses dependencies and emits them in the requested format.
 """
 
-import itertools
 import pathlib
 import sys
 
 from jaraco.ui.main import main
+from more_itertools import flatten
 
 from .imports import Import, get_module_imports
 from .pypi import NoDistributionForImport, distribution_for
@@ -40,9 +40,6 @@ def emit_pep723(deps):
 def parse_glob(glob):
     print(glob)
     return glob
-
-
-flatten = itertools.chain.from_iterable
 
 
 @main
