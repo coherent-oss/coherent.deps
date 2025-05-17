@@ -21,24 +21,24 @@ from . import imports, pypi
 
 
 def emit_plain(deps):
-    print(*sorted(deps), sep="\n")
+    print(*deps, sep="\n")
 
 
 def emit_toml(deps):
     print("[project]\nrequires = [")
-    print(*map(lambda d: f'    "{d}",', sorted(deps)), sep="\n")
+    print(*map(lambda d: f'    "{d}",', deps), sep="\n")
     print("]")
 
 
 def emit_inline(deps):
     print("""# ///\n# requires-python = ">=3.8"\n# dependencies = [""")
-    print(*map(lambda d: f'#     "{d}",', sorted(deps)), sep="\n")
+    print(*map(lambda d: f'#     "{d}",', deps), sep="\n")
     print("# ]\n# ///")
 
 
 def emit_python(deps):
     print("""__requires__ = [""")
-    print(*map(lambda d: f'    "{d}",', sorted(deps)), sep="\n")
+    print(*map(lambda d: f'    "{d}",', deps), sep="\n")
     print("]")
 
 
