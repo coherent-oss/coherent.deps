@@ -155,11 +155,18 @@ def get_module_imports(module: pathlib.Path | str | bytes) -> Generator[str]:
     >>> list(get_module_imports('from .foo import bar'))
     ['.foo.bar']
 
+    Any names excluded by pyright are also excluded (#18).
+
+    >>> list(get_module_imports('import nspkg  # ignore[reportMissingImports]\nimport foo'))
+    ['foo']
+
     """
+    excluded_lines = excludes(get_module_comments(module))
     return (
         Import.read(node, alias)
         for node in ast.walk(ast.parse(module))
-        if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom)
+        if isinstance(node, (ast.Import, ast.ImportFrom))
+        and node.lineno not in excluded_lines
         for alias in node.names
     )
 
@@ -179,6 +186,17 @@ def get_module_comments(code: bytes | str) -> dict[int, str]:
         token.start[0]: token.string
         for token in tokenize.generate_tokens(io.StringIO(code).readline)
         if token.type == tokenize.COMMENT
+    }
+
+
+def excludes(comments):
+    """
+    Exclude lines based on comments.
+    """
+    return {
+        line: comment
+        for line, comment in comments.items()
+        if 'ignore[reportMissingImports]' in comment
     }
 
 
