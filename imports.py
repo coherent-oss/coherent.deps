@@ -16,10 +16,12 @@ from __future__ import annotations
 
 import ast
 import functools
+import io
 import os
 import pathlib
 import subprocess
 import sys
+import tokenize
 from collections.abc import Generator
 
 import jaraco.context
@@ -165,6 +167,24 @@ def get_module_imports(module: pathlib.Path | str | bytes) -> Generator[str]:
 @get_module_imports.register
 def _(module: pathlib.Path):
     return get_module_imports(module.read_bytes())
+
+
+@functools.singledispatch
+def get_module_comments(code: bytes | str) -> dict[int, str]:
+    r"""
+    >>> get_module_comments('# foo\n# bar')
+    {1: '# foo', 2: '# bar'}
+    """
+    return {
+        token.start[0]: token.string
+        for token in tokenize.generate_tokens(io.StringIO(code).readline)
+        if token.type == tokenize.COMMENT
+    }
+
+
+@get_module_comments.register
+def _(code: bytes):
+    return get_module_comments(code.decode('utf-8'))
 
 
 def print_module_imports(path: pathlib.Path):
