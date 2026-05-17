@@ -33,7 +33,7 @@ There is a subpackage, `distributions`, which contains two scripts, `load` and `
 To get the full set of "top downloaded" packages that contain at least one download, run this query:
 
 ```
- 🐚 pipx run --python 3.13 pypinfo --json --indent 0 --limit 800000 --days 30 "" project > ~/Downloads/top-pypi-packages-30-days.json
+ 🐚 pipx run pypinfo --json --indent 0 --limit 800000 --days 30 "" project > ~/Downloads/top-pypi-packages-30-days.json
 ```
 
 Note that this pypinfo script requires a Google API key and with a very high limit like 800000, will cost several dollars to run, so the maintainer only runs it about twice a year.
@@ -41,7 +41,7 @@ Note that this pypinfo script requires a Google API key and with a very high lim
 Then, to refresh the database with the downloaded dataset:
 
 ```
- 🐚 py -3.13 -m pip-run coherent.deps -- -m coherent.deps.distributions.load ~/Downloads/top-pypi-packages-30-days.json
+ 🐚 pip-run coherent.deps -- -m coherent.deps.distributions.load ~/Downloads/top-pypi-packages-30-days.json
 ```
 
 This process will ensure that all packages are up-to-date with their latest download stats.
@@ -49,7 +49,7 @@ This process will ensure that all packages are up-to-date with their latest down
 From there, ensure that any newly-added packages are processed:
 
 ```
- 🐚 py -3.13 -m pip-run coherent.deps -- -m coherent.deps.distributions.process
+ 🐚 pip-run coherent.deps -- -m coherent.deps.distributions.process
 ```
 
 Note that only those entries without an `updated` field will be processed. To re-process packgaes that may have grown stale, clear the `updated` field on those entries. For example, to mark stale any entries older than 6 months:
