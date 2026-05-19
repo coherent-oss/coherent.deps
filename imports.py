@@ -132,7 +132,7 @@ class Import(str):
         """
         # Windows can choke without these vars (python/cpython#120836)
         safe_isolation = Projection(['SYSTEMDRIVE', 'SYSTEMROOT'], os.environ)
-        cmd = [sys.executable, '-S', '-c', f'import {top_level_name}']
+        cmd = [sys.executable, '-P', '-S', '-c', f'import {top_level_name}']
         subprocess.check_call(cmd, env=safe_isolation, stderr=subprocess.DEVNULL)
 
 
