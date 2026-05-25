@@ -140,7 +140,6 @@ class Import(str):
         >>> Import._check_standard.cache_clear()
         >>> Import._check_standard('pathlib')
         True
-        >>> Import._check_standard.cache_clear()
         """
         # Windows can choke without these vars (python/cpython#120836)
         safe_isolation = Projection(['SYSTEMDRIVE', 'SYSTEMROOT'], os.environ)
