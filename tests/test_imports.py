@@ -1,11 +1,14 @@
-from imports import Import
+"""
+The stdlib probe should remain stable even when cwd contains a module
+that shadows a stdlib dependency (`glob.py` while importing `pathlib`).
 
-
-def test_standard_probe_ignores_shadowing_from_cwd(tmp_path, monkeypatch):
-    (tmp_path / 'glob.py').write_text("raise RuntimeError('shadowed glob')")
-    monkeypatch.chdir(tmp_path)
-    Import._check_standard.cache_clear()
-    try:
-        assert Import('pathlib').standard()
-    finally:
-        Import._check_standard.cache_clear()
+>>> import pathlib
+>>> import jaraco.context
+>>> from imports import Import
+>>> with jaraco.context.temp_dir() as td, jaraco.context.pushd(td):
+...     _ = pathlib.Path('glob.py').write_text("raise RuntimeError('shadowed glob')")
+...     Import._check_standard.cache_clear()
+...     Import('pathlib').standard()
+True
+>>> Import._check_standard.cache_clear()
+"""
