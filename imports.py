@@ -78,8 +78,17 @@ class Import(str):
         False
         >>> Import('.os').standard()
         False
+
+        Platform-specific stdlib modules are recognized as standard even
+        when they're not importable on the current host (e.g. ``winreg``
+        on non-Windows).
+
+        >>> Import('winreg').standard()
+        True
         """
-        return bool(self.top) and self._check_standard(self.top)
+        return bool(self.top) and (
+            self.top in sys.stdlib_module_names or self._check_standard(self.top)
+        )
 
     @property
     def top(self) -> str | None:
