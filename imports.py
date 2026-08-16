@@ -27,6 +27,8 @@ from collections.abc import Generator
 import jaraco.context
 from jaraco.collections import Projection
 
+from .compat.py310 import safe_path
+
 
 def rel_prefix(node):
     return '.' * getattr(node, 'level', 0)
@@ -138,10 +140,21 @@ class Import(str):
         Attempt to import the name in a clean Python interpreter.
 
         Return True if it's found in the standard library, and False otherwise.
+
+        The probe should remain stable even when cwd contains a module that
+        shadows a stdlib dependency.
+
+        >>> tmp_path = getfixture('tmp_path')
+        >>> monkeypatch = getfixture('monkeypatch')
+        >>> _ = (tmp_path / 'glob.py').write_text("raise RuntimeError('shadowed glob')")
+        >>> monkeypatch.chdir(tmp_path)
+        >>> Import._check_standard.cache_clear()
+        >>> Import._check_standard('pathlib')
+        True
         """
         # Windows can choke without these vars (python/cpython#120836)
         safe_isolation = Projection(['SYSTEMDRIVE', 'SYSTEMROOT'], os.environ)
-        cmd = [sys.executable, '-S', '-c', f'import {top_level_name}']
+        cmd = [sys.executable, safe_path, '-S', '-c', f'import {top_level_name}']
         subprocess.check_call(cmd, env=safe_isolation, stderr=subprocess.DEVNULL)
 
 
