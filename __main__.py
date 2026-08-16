@@ -23,19 +23,19 @@ def emit_plain(deps):
 
 def emit_toml(deps):
     yield "[project]\nrequires = ["
-    yield from map(lambda d: f'    "{d}",', deps)
+    yield from (f'    "{d}",' for d in deps)
     yield "]"
 
 
 def emit_inline(deps):
     yield """# ///\n# requires-python = ">=3.8"\n# dependencies = ["""
-    yield from map(lambda d: f'#     "{d}",', deps)
+    yield from (f'#     "{d}",' for d in deps)
     yield "# ]\n# ///"
 
 
 def emit_python(deps):
     yield """__requires__ = ["""
-    yield from map(lambda d: f'    "{d}",', deps)
+    yield from (f'    "{d}",' for d in deps)
     yield "]"
 
 

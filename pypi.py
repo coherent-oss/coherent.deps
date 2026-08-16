@@ -249,7 +249,7 @@ def top(package_name: str) -> str:
     >>> top('foo')
     ''
     """
-    top, sep, name = package_name.partition('.')
+    top, sep, _name = package_name.partition('.')
     return sep and top
 
 
@@ -262,7 +262,7 @@ def parent(package_name: str) -> str:
     >>> parent('foo')
     ''
     """
-    parent, sep, name = package_name.rpartition('.')
+    parent, sep, _name = package_name.rpartition('.')
     return sep and parent
 
 
@@ -304,7 +304,7 @@ def open(path: zipfile.Path):
     """
     buffer = path.open('rb')
     try:
-        encoding, lines = tokenize.detect_encoding(buffer.readline)
+        encoding, _lines = tokenize.detect_encoding(buffer.readline)
         buffer.seek(0)
         text = io.TextIOWrapper(buffer, encoding, line_buffering=True)
         text.mode = 'r'
