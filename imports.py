@@ -26,8 +26,7 @@ from collections.abc import Generator
 
 import jaraco.context
 from jaraco.collections import Projection
-
-from .compat.py310 import safe_path
+from jaraco.compat.py310 import safe_path
 
 
 def rel_prefix(node):
@@ -154,8 +153,9 @@ class Import(str):
         """
         # Windows can choke without these vars (python/cpython#120836)
         safe_isolation = Projection(['SYSTEMDRIVE', 'SYSTEMROOT'], os.environ)
-        cmd = [sys.executable, safe_path, '-S', '-c', f'import {top_level_name}']
-        subprocess.check_call(cmd, env=safe_isolation, stderr=subprocess.DEVNULL)
+        cmd = safe_path.command('-S', '-c', f'import {top_level_name}')
+        env = safe_path.environ(safe_isolation)
+        subprocess.check_call(cmd, env=env, stderr=subprocess.DEVNULL)
 
 
 @functools.singledispatch
