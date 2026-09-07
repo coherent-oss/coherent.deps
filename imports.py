@@ -28,6 +28,8 @@ import jaraco.context
 from jaraco.collections import Projection
 from jaraco.compat.py310 import safe_path
 
+from . import _directives
+
 
 def rel_prefix(node):
     return '.' * getattr(node, 'level', 0)
@@ -177,9 +179,11 @@ def get_module_imports(module: pathlib.Path | str | bytes) -> Generator[str]:
     >>> list(get_module_imports('from .foo import bar'))
     ['.foo.bar']
 
-    Any names excluded by pyright are also excluded (#18).
+    An import annotated to suppress dependency inference is excluded, so
+    it doesn't become a declared dependency (#26).
 
-    >>> list(get_module_imports('import nspkg  # ignore[reportMissingImports]\nimport foo'))
+    >>> src = 'import nspkg  # deps: ignore[inferred-dependency]\nimport foo'
+    >>> list(get_module_imports(src))
     ['foo']
 
     """
@@ -213,12 +217,15 @@ def get_module_comments(code: bytes | str) -> dict[int, str]:
 
 def excludes(comments):
     """
-    Exclude lines based on comments.
+    Exclude lines whose comment suppresses dependency inference.
+
+    A ``deps: ignore[inferred-dependency]`` directive (#26) keeps an import
+    from becoming a declared dependency.
     """
     return {
         line: comment
         for line, comment in comments.items()
-        if 'ignore[reportMissingImports]' in comment
+        if _directives.match('deps: ignore[inferred-dependency]', comment)
     }
 
 
