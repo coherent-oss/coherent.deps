@@ -19,7 +19,6 @@ import functools
 import io
 import os
 import pathlib
-import re
 import subprocess
 import sys
 import tokenize
@@ -28,6 +27,8 @@ from collections.abc import Generator
 import jaraco.context
 from jaraco.collections import Projection
 from jaraco.compat.py310 import safe_path
+
+from . import _directives
 
 
 def rel_prefix(node):
@@ -214,62 +215,17 @@ def get_module_comments(code: bytes | str) -> dict[int, str]:
     }
 
 
-_infer_directive = re.compile(r'\bdeps\s*:\s*ignore\s*(?:\[(?P<rules>[^\]]*)\])?')
-"""
-A ``scope: ignore[rule]`` directive suppressing dependency inference,
-matching the shape of type-checker directives (e.g.
-``ty: ignore[unresolved-import]``). See #26.
-"""
-
-
-def suppresses_inference(comment: str) -> bool:
-    """
-    Does this comment suppress dependency inference for its line?
-
-    The canonical directive is ``deps: ignore[inferred-dependency]``:
-
-    >>> suppresses_inference('# deps: ignore[inferred-dependency]')
-    True
-
-    A bare ``deps: ignore`` suppresses inference for the line too:
-
-    >>> suppresses_inference('# deps: ignore')
-    True
-
-    It coexists with a type-checker directive on the same line, so an
-    import that's runtime-provided (and thus unresolvable when the
-    provider is absent) can satisfy both concerns at once:
-
-    >>> suppresses_inference(
-    ...     '# ty: ignore[unresolved-import]  # deps: ignore[inferred-dependency]'
-    ... )
-    True
-
-    Other ``deps`` rules don't suppress inference:
-
-    >>> suppresses_inference('# deps: ignore[some-other-rule]')
-    False
-
-    An unrelated comment has no effect:
-
-    >>> suppresses_inference('# just a comment')
-    False
-    """
-    return any(
-        match['rules'] is None
-        or 'inferred-dependency' in map(str.strip, match['rules'].split(','))
-        for match in _infer_directive.finditer(comment)
-    )
-
-
 def excludes(comments):
     """
     Exclude lines whose comment suppresses dependency inference.
+
+    A ``deps: ignore[inferred-dependency]`` directive (#26) keeps an import
+    from becoming a declared dependency.
     """
     return {
         line: comment
         for line, comment in comments.items()
-        if suppresses_inference(comment)
+        if _directives.match('deps: ignore[inferred-dependency]', comment)
     }
 
 
