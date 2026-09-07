@@ -179,16 +179,10 @@ def get_module_imports(module: pathlib.Path | str | bytes) -> Generator[str]:
     ['.foo.bar']
 
     An import annotated to suppress dependency inference is excluded, so
-    it doesn't become a declared dependency (coherent-oss/coherent.build#71).
+    it doesn't become a declared dependency (#26).
 
     >>> src = 'import nspkg  # deps: ignore[inferred-dependency]\nimport foo'
     >>> list(get_module_imports(src))
-    ['foo']
-
-    A pyright ``ignore[reportMissingImports]`` directive is also honored,
-    for backward compatibility (#18).
-
-    >>> list(get_module_imports('import nspkg  # ignore[reportMissingImports]\nimport foo'))
     ['foo']
 
     """
@@ -220,10 +214,12 @@ def get_module_comments(code: bytes | str) -> dict[int, str]:
     }
 
 
-# A ``scope: ignore[rule]`` directive suppressing dependency inference,
-# matching the shape of type-checker directives (e.g. ``ty: ignore[
-# unresolved-import]``). See coherent-oss/coherent.build#71.
 _infer_directive = re.compile(r'\bdeps\s*:\s*ignore\s*(?:\[(?P<rules>[^\]]*)\])?')
+"""
+A ``scope: ignore[rule]`` directive suppressing dependency inference,
+matching the shape of type-checker directives (e.g.
+``ty: ignore[unresolved-import]``). See #26.
+"""
 
 
 def suppresses_inference(comment: str) -> bool:
@@ -254,19 +250,11 @@ def suppresses_inference(comment: str) -> bool:
     >>> suppresses_inference('# deps: ignore[some-other-rule]')
     False
 
-    A pyright ``ignore[reportMissingImports]`` directive is honored for
-    backward compatibility:
-
-    >>> suppresses_inference('# type: ignore[reportMissingImports]')
-    True
-
     An unrelated comment has no effect:
 
     >>> suppresses_inference('# just a comment')
     False
     """
-    if 'ignore[reportMissingImports]' in comment:
-        return True
     return any(
         match['rules'] is None
         or 'inferred-dependency' in map(str.strip, match['rules'].split(','))
